@@ -105,14 +105,48 @@ FROM(
 	FROM tbl_visit
 	WHERE visited_at BETWEEN '2020-07-01 00:00:00' AND '2020-07-31 23:59:59' 
 	GROUP BY visited_date
-	) visited ;
+	) dau ;
 
 
 -- 07. 2020년 7월의 평균 WAU
+-- 7월 주별 active user count
+SELECT WEEK(visited_at) as visited_week,
+	COUNT(DISTINCT customer_id) as wau
+FROM tbl_visit
+WHERE visited_at BETWEEN '2020-07-01 00:00:00' AND '2020-07-31 23:59:59' 
+GROUP BY visited_week ;
+
+-- 7월 평균 wau
+SELECT AVG(wau)
+FROM(
+	SELECT WEEK(visited_at) as visited_week,
+		COUNT(DISTINCT customer_id) as wau
+	FROM tbl_visit
+	WHERE visited_at BETWEEN '2020-07-01 00:00:00' AND '2020-07-31 23:59:59' 
+	GROUP BY visited_week
+    ) wau ;
 
 
 
 -- 08. 2020년 7월의 Daily Revenue는 증가하는 추세인가? 평균 Daily Revenue는?
+-- 7월 daily revenue
+SELECT LEFT(purchased_at, 10) as purchased_date,
+	SUM(price) as revenue
+FROM tbl_purchase
+WHERE purchased_at BETWEEN '2020-07-01 00:00:00' AND '2020-07-31 23:59:59'
+GROUP BY LEFT(purchased_at, 10) ;
+-- 증가하는 추세이다
+
+-- 7월 평균 daily revenue
+SELECT AVG(revenue)
+FROM(
+	SELECT LEFT(purchased_at, 10) as purchased_date,
+		SUM(price) as revenue
+	FROM tbl_purchase
+	WHERE purchased_at BETWEEN '2020-07-01 00:00:00' AND '2020-07-31 23:59:59'
+	GROUP BY LEFT(purchased_at, 10)
+	) daily_revenue
+
 
 -- 09. 2020년 7월의 평균 weekly revenue
 
