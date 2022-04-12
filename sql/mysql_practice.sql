@@ -81,8 +81,36 @@ LIMIT 9, 6;
 
 
 -- 06. 2020년 7월의 평균 DAU를 구하라. Active User 수가 증가하는 추세인가?
+-- 7월 일별 dau
+SELECT DATE(visited_at) as visited_date,
+	COUNT(DISTINCT customer_id) as DAU
+FROM tbl_visit
+WHERE visited_at BETWEEN '2020-07-01 00:00:00' AND '2020-07-31 23:59:59' 
+GROUP BY visited_date ;
+-- 8월 1일이 왜 끼어있는지?
+
+-- 7월 일별 dau 2트: 날짜에서 문제가 있는듯 하여 그냥 숫자를 잘라버렸다 
+SELECT LEFT(visited_at, 10) as visited_date,
+	COUNT(DISTINCT customer_id) as dau
+FROM tbl_visit
+WHERE visited_at BETWEEN '2020-07-01 00:00:00' AND '2020-07-31 23:59:59' 
+GROUP BY visited_date ;
+-- 7월 유저 추세 : 증가하는 중
+
+-- 7월 평균 DAU 
+SELECT AVG(dau)
+FROM(
+	SELECT LEFT(visited_at, 10) as visited_date,
+		COUNT(DISTINCT customer_id) as dau
+	FROM tbl_visit
+	WHERE visited_at BETWEEN '2020-07-01 00:00:00' AND '2020-07-31 23:59:59' 
+	GROUP BY visited_date
+	) visited ;
+
 
 -- 07. 2020년 7월의 평균 WAU
+
+
 
 -- 08. 2020년 7월의 Daily Revenue는 증가하는 추세인가? 평균 Daily Revenue는?
 
