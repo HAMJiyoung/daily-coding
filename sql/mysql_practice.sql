@@ -145,14 +145,46 @@ FROM(
 	FROM tbl_purchase
 	WHERE purchased_at BETWEEN '2020-07-01 00:00:00' AND '2020-07-31 23:59:59'
 	GROUP BY LEFT(purchased_at, 10)
-	) daily_revenue
+	) daily_revenue ;
 
 
 -- 09. 2020년 7월의 평균 weekly revenue
+SELECT AVG(revenue)
+FROM(
+	SELECT WEEK(purchased_at) as visited_week,
+		SUM(price) as revenue
+	FROM tbl_purchase
+	WHERE purchased_at BETWEEN '2020-07-01 00:00:00' AND '2020-07-31 23:59:59' 
+	GROUP BY visited_week
+    ) weekly_revenue ;
+
 
 -- 10. 2020년 7월 요일별 revenue. 가장 높은 요일과 가장 낮은 요일
+-- 단순 요일별 합계
+SELECT DATE_FORMAT(purchased_at, '%w') as visited_day_of_week,
+		SUM(price) as revenue
+FROM tbl_purchase
+WHERE purchased_at BETWEEN '2020-07-01 00:00:00' AND '2020-07-31 23:59:59' 
+GROUP BY visited_day_of_week 
+ORDER BY revenue DESC;
+-- 0 = sunday, 6 = saturday
+-- max = thursday, min = sunday
+
+-- 요일별 평균
+SELECT DATE_FORMAT(purchased_date, '%W') as date_name,
+	AVG(revenue) 
+FROM (SELECT LEFT(purchased_at, 10) as purchased_date,
+		SUM(price) as revenue
+	FROM tbl_purchase
+	WHERE purchased_at BETWEEN '2020-07-01 00:00:00' AND '2020-07-31 23:59:59' 
+	GROUP BY LEFT(purchased_at, 10) 
+	ORDER BY revenue DESC) tbl_dow_revenue 
+GROUP BY date_name ;
+
+
 
 -- 11. 2020년 7월 시간대별 revenue. 가장 높은 시간대와 가장 낮은 시간대
+
 
 -- 12. 2020년 7월 요일 및 시간대별 revenue. 가장 높은 &낮은 
 
