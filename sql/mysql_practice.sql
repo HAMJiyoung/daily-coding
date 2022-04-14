@@ -184,11 +184,80 @@ GROUP BY date_name ;
 
 
 -- 11. 2020년 7월 시간대별 revenue. 가장 높은 시간대와 가장 낮은 시간대
+SELECT HOUR(purchased_at) as purchased_hour,
+	SUM(price)
+FROM tbl_purchase 
+WHERE purchased_at BETWEEN '2020-07-01 00:00:00' AND '2020-07-31 23:59:59' 
+GROUP BY purchased_hour
+ORDER BY SUM(price) DESC ;
+-- 엥 새벽 3시가 가장 높다고? 이게 맞나 뭔가 이상한데
+SELECT HOUR(REPLACE(purchased_at, '+00:00', '')) as purchased_hour,
+	SUM(price)
+FROM tbl_purchase 
+WHERE purchased_at BETWEEN '2020-07-01 00:00:00' AND '2020-07-31 23:59:59' 
+GROUP BY purchased_hour
+ORDER BY SUM(price) DESC ;
+-- 가장 높은 시간: 18시, 가장 낮은 시간: 6시 
+
 
 
 -- 12. 2020년 7월 요일 및 시간대별 revenue. 가장 높은 &낮은 
+SELECT DATE_FORMAT(purchased_at, '%W') as purchased_day,
+	HOUR(REPLACE(purchased_at, '+00:00', '')) as purchased_hour,
+	SUM(price)
+FROM tbl_purchase 
+WHERE purchased_at BETWEEN '2020-07-01 00:00:00' AND '2020-07-31 23:59:59' 
+GROUP BY 1, 2
+ORDER BY SUM(price) DESC ;
+-- 가장 높은: 목요일 16시, 가장 낮은: 토요일 6시
 
--- 13. 성/연령별 유저 숫자. 남녀 외 기타 성별은 하나로, 연령은 5세단위, 숫자가 높은 순서대로 정렬
+-- 날짜 추가
+SELECT LEFT(purchased_at, 10) as purchased_date,
+	DATE_FORMAT(purchased_at, '%W') as purchased_day,
+	HOUR(REPLACE(purchased_at, '+00:00', '')) as purchased_hour,
+	SUM(price)
+FROM tbl_purchase 
+WHERE purchased_at BETWEEN '2020-07-01 00:00:00' AND '2020-07-31 23:59:59' 
+GROUP BY 1, 2, 3
+ORDER BY SUM(price) DESC ;
+-- 27일 월요일 13시 최고 매출, 11일 토요일 6시 최저 매출 
+
+
+-- 13. 성/연령별 유저 숫자. 남녀 외 기타 성별은 하나로, 연령은 10세단위, 숫자가 높은 순서대로 정렬
+SELECT gender,
+	COUNT(*)
+FROM tbl_customer
+GROUP BY gender ;
+
+-- 남녀 외 기타 성별 합치기
+SELECT 
+	CASE gender
+		WHEN 'F' THEN gender
+		WHEN 'M' THEN gender
+		ELSE 'Other'
+	END AS gender_all,
+    COUNT(*) as user_cnt
+FROM tbl_customer 
+GROUP BY gender_all
+ORDER BY user_cnt DESC ;
+
+-- 나이대 분류
+SELECT
+    CASE 
+    WHEN age < 10 THEN '~10'
+    WHEN age < 20 THEN '~19'
+    WHEN age < 30 THEN '~29'
+    WHEN age < 40 THEN '~39'
+    WHEN age < 50 THEN '~49'
+    WHEN 50 < age THEN '49~'
+    ELSE 'None'
+    END AS age_range,
+    COUNT(*) as user_cnt
+FROM tbl_customer 
+GROUP BY age_range
+ORDER BY user_cnt DESC ;
+-- 20~29세 가장 많음 
+
 
 -- 14. 13의 결과를 성별(연령)의 형태로 통합하고, 각 성/연령이 전체의 몇 %인지 숫자가 높은 순서대로 정렬 
 
