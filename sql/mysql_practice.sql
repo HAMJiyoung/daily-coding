@@ -260,6 +260,26 @@ ORDER BY user_cnt DESC ;
 
 
 -- 14. 13의 결과를 성별(연령)의 형태로 통합하고, 각 성/연령이 전체의 몇 %인지 숫자가 높은 순서대로 정렬 
+SELECT CONCAT(
+	CASE gender
+		WHEN 'F' THEN gender
+		WHEN 'M' THEN gender
+		ELSE 'Other'
+	END,
+	CASE 
+		WHEN age < 10 THEN '(~10)'
+		WHEN age < 20 THEN '(~19)'
+		WHEN age < 30 THEN '(~29)'
+		WHEN age < 40 THEN '(~39)'
+		WHEN age < 50 THEN '(~49)'
+		WHEN 50 < age THEN '(49~)'
+		ELSE '(None)'
+    END) AS user_segment,
+    (COUNT(*) / (SELECT COUNT(*) FROM tbl_customer)) * 100 as user_ratio
+FROM tbl_customer 
+GROUP BY user_segment
+ORDER BY user_ratio DESC ;
+-- 가장 많은 segment: F(~29)
 
 -- 15. 2020년 7월, 성별에 따른 구매 건수와 총 revenue(남녀 외 성별은 하나로)
 
