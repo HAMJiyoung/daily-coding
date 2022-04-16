@@ -282,8 +282,43 @@ ORDER BY user_ratio DESC ;
 -- 가장 많은 segment: F(~29)
 
 -- 15. 2020년 7월, 성별에 따른 구매 건수와 총 revenue(남녀 외 성별은 하나로)
+SELECT 
+	CASE gender
+		WHEN 'F' THEN gender
+		WHEN 'M' THEN gender
+		ELSE 'Other'
+	END AS gender_all,
+	COUNT(*) AS cnt_purchased,
+    SUM(price) AS revenue
+FROM tbl_purchase
+JOIN tbl_customer
+	ON tbl_purchase.customer_id = tbl_customer.customer_id 
+GROUP BY gender_all ;
+
 
 -- 16. 2020년 7월의 성별/연령대에 따라 구매 건수와 총 revenue(남녀 외 성별은 하나로)
+SELECT CONCAT(
+	CASE gender
+		WHEN 'F' THEN gender
+		WHEN 'M' THEN gender
+		ELSE 'Other'
+	END,
+	CASE 
+		WHEN age < 10 THEN '(~10)'
+		WHEN age < 20 THEN '(~19)'
+		WHEN age < 30 THEN '(~29)'
+		WHEN age < 40 THEN '(~39)'
+		WHEN age < 50 THEN '(~49)'
+		WHEN 50 < age THEN '(49~)'
+		ELSE '(None)'
+    END) AS user_segment,
+    COUNT(*) AS cnt_purchased,
+    SUM(price) AS revenue
+FROM tbl_purchase
+JOIN tbl_customer
+	ON tbl_purchase.customer_id = tbl_customer.customer_id
+GROUP BY user_segment 
+ORDER BY revenue DESC ;
 
 -- 17. 2020년 7월 일별 매출과 증감폭, 증감률
 
