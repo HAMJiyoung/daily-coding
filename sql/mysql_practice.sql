@@ -293,6 +293,7 @@ SELECT
 FROM tbl_purchase
 JOIN tbl_customer
 	ON tbl_purchase.customer_id = tbl_customer.customer_id 
+WHERE purchased_at BETWEEN '2020-07-01 00:00:00' AND '2020-07-31 23:59:59' 
 GROUP BY gender_all ;
 
 
@@ -317,10 +318,26 @@ SELECT CONCAT(
 FROM tbl_purchase
 JOIN tbl_customer
 	ON tbl_purchase.customer_id = tbl_customer.customer_id
+WHERE purchased_at BETWEEN '2020-07-01 00:00:00' AND '2020-07-31 23:59:59' 
 GROUP BY user_segment 
 ORDER BY revenue DESC ;
 
 -- 17. 2020년 7월 일별 매출과 증감폭, 증감률
+
+WITH tbl_total 
+	AS (SELECT purchased_date,
+			SUM(price) AS revenue
+		FROM tbl_purchase
+		WHERE purchased_at BETWEEN '2020-07-01 00:00:00' AND '2020-07-31 23:59:59' 
+		GROUP BY purchased_date)
+
+SELECT purchased_date,
+	revenue,
+    revenue - LAG(revenue) OVER (ORDER BY purchased_date) AS diff_rev,
+    ROUND((revenue - LAG(revenue) OVER (ORDER BY purchased_date)) / LAG(revenue) OVER (ORDER BY purchased_date) *100, 1) AS ratio
+FROM tbl_total ;
+
+
 
 -- 18. 2020년 7월 일별로 구매금액 기준 가장 많이 지출한 고객 top3 
 
