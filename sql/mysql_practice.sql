@@ -340,6 +340,47 @@ FROM tbl_total ;
 
 
 -- 18. 2020년 7월 일별로 구매금액 기준 가장 많이 지출한 고객 top3 
+-- 일별 구매금액 높은 유저 순으로 정렬
+SELECT purchased_date,
+	customer_id,
+    SUM(price) AS revenue
+FROM tbl_purchase
+WHERE purchased_at BETWEEN '2020-07-01 00:00:00' AND '2020-07-31 23:59:59' 
+GROUP BY purchased_date, customer_id 
+ORDER BY purchased_date, revenue DESC ;
+-- 이 중에서 일별 3명씩을 뽑아야 한다. 어떻게 하면 될까
+-- rank 관련 함수로 일자별 고객을 정렬, 같은 금액 있을 수 있으니 dense_rank로 가격이 같은 사람도 포함되도록
+SELECT purchased_date,
+	customer_id,
+    revenue
+FROM(
+	SELECT purchased_date,
+		customer_id,
+		SUM(price) AS revenue,
+		DENSE_RANK() OVER(PARTITION BY purchased_date ORDER BY SUM(price) DESC) AS ranking
+	FROM tbl_purchase
+	WHERE purchased_at BETWEEN '2020-07-01 00:00:00' AND '2020-07-31 23:59:59' 
+	GROUP BY purchased_date, customer_id 
+	ORDER BY purchased_date, revenue DESC) AS tbl_ranking
+WHERE ranking < 4 ;
+
+-- +추가로 이 중에 가장 많이 count된 고객이 누구일까 궁금
+WITH tbl_ranking AS(SELECT purchased_date,
+						customer_id,
+						SUM(price) AS revenue,
+						DENSE_RANK() OVER(PARTITION BY purchased_date ORDER BY SUM(price) DESC) AS ranking
+					FROM tbl_purchase
+					WHERE purchased_at BETWEEN '2020-07-01 00:00:00' AND '2020-07-31 23:59:59' 
+					GROUP BY purchased_date, customer_id 
+					ORDER BY purchased_date, revenue DESC)
+                    
+SELECT customer_id,
+	COUNT(*) AS cnt_user
+FROM tbl_ranking
+WHERE ranking < 4 
+GROUP BY customer_id 
+ORDER BY cnt_user DESC ;
+-- 37563님 축하합니다~ 1등
 
 -- 19. 2020년 7월 신규유저가 하루 내에 결제로 넘어가는 비율은? 결제까지 평균 소요 분?
 
@@ -348,3 +389,12 @@ FROM tbl_total ;
 
 -- 21. 가입 기간별 고객 분포(기존/신규) dau 기준
 
+-- 22. 2020년 7월 기준, 누적 구매 횟수 3번 이상인 고객 리스트 추출
+
+-- 23. 2020년 7월 각 카테고리별 판매 금액과 비율 (%)
+
+-- 24. 2020년 7월 Furniture와 Education을 각 1회 이상씩 구매한 고객 수 
+
+-- 25. 전체 기간 동안 첫 구매는 Furniture, 마지막 구매는 다른 카테고리인 고객 수
+
+-- 26. 첫 구매 카테고리별로 1달 리텐션
