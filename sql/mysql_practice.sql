@@ -383,6 +383,33 @@ ORDER BY cnt_user DESC ;
 -- 37563님 축하합니다~ 1등
 
 -- 19. 2020년 7월 신규유저가 하루 내에 결제로 넘어가는 비율은? 결제까지 평균 소요 분?
+-- 2020년 7월 신규 가입한 유저, 해당 유저들 중 하루 내에 결제한 유저, 구매 일시 - 신규 가입 일시 분 
+WITH tbl_new_purchased AS(
+	SELECT c.customer_id,
+		p.customer_id AS paying_user,
+		TIME_TO_SEC(TIMEDIFF(p.first_purchase_date, c.created_at)) AS diff_time
+	-- 신규 가입 유저 테이블에
+	FROM tbl_customer AS c
+	-- 해당 유저들의 첫 구매 일시 left join
+	LEFT JOIN(
+				SELECT MIN(purchased_at) AS first_purchase_date,
+					customer_id
+				FROM tbl_purchase
+				GROUP BY customer_id) AS p
+		ON c.customer_id = p.customer_id
+        -- 신규 가입 일시 + 1 > 구매 일시
+        AND c.created_at + INTERVAL 1 DAY > p.first_purchase_date
+	-- 2020년 7월 신규 가입자만
+	WHERE created_at >= '2020-07-01 00:00:00'
+		AND created_at < '2020-08-01 00:00:00')
+
+SELECT ROUND(COUNT(paying_user) / COUNT(customer_id) * 100, 1) AS cvr,
+	ROUND(AVG(diff_time) / 3600, 1) AS avg_time
+FROM tbl_new_purchased ;-- conversion rate
+
+
+
+
 
 -- 20. 2020년 7월 기준 day1 리텐션이 어떤가? 추세를 보기 위해 daily 추출
 -- N-day Retention: N = 1,2,3,... 등
