@@ -419,6 +419,12 @@ FROM tbl_new_purchased ;-- conversion rate
 -- 22. 2020년 7월 기준, 누적 구매 횟수 3번 이상인 고객 리스트 추출
 
 -- 23. 2020년 7월 각 카테고리별 판매 금액과 비율 (%)
+SELECT category,
+	SUM(price) AS revenue
+FROM tbl_purchase
+WHERE purchased_date BETWEEN '2020-07-01' AND '2020-07-31'
+GROUP BY category ;
+-- 비율은 내일,,
 
 -- 24. 2020년 7월 Furniture와 Education을 각 1회 이상씩 구매한 고객 수 
 
