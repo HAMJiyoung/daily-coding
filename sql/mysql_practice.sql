@@ -409,6 +409,69 @@ FROM tbl_new_purchased ;-- conversion rate
 
 
 
+-- 20. 2020년 7월 각 카테고리별 판매 금액과 비율 (%)
+-- total_revenue
+SELECT SUM(price)
+FROM tbl_purchase
+WHERE purchased_date BETWEEN '2020-07-01' AND '2020-07-31' ;
+
+-- category revenue, ratio
+SELECT category,
+	SUM(price) AS revenue,
+	ROUND(SUM(price) / 21060206300, 4) AS ratio
+FROM tbl_purchase
+WHERE purchased_date BETWEEN '2020-07-01' AND '2020-07-31'
+GROUP BY category ;
+-- 가끔은 단순하게 하는게 제일 빠를수도 있다
+
+
+-- 21. 2020년 7월 기준, 누적 구매 횟수 3번 이상인 고객 리스트 추출, 많이 구매한 순서
+SELECT customer_id,
+	COUNT(*) AS cnt_purchase
+FROM tbl_purchase
+WHERE purchased_date <= '2020-07-31' 
+GROUP BY customer_id 
+HAVING cnt_purchase >= 3 
+ORDER BY cnt_purchase DESC ;
+
+
+-- 22. 2020년 7월 Furniture와 Education을 각 1회 이상씩 구매한 고객 수 
+-- furniture
+SELECT customer_id,
+	category,
+    COUNT(*) AS cnt_purchase
+FROM tbl_purchase
+WHERE purchased_date BETWEEN '2020-07-01' AND '2020-07-31'
+	AND category = 'Furniture'
+GROUP BY customer_id, category ;
+
+-- Education
+SELECT customer_id,
+	category,
+    COUNT(*) AS cnt_purchase
+FROM tbl_purchase
+WHERE purchased_date BETWEEN '2020-07-01' AND '2020-07-31'
+	AND category = 'Education'
+GROUP BY customer_id, category ;
+
+-- customer_id 기준 join
+SELECT COUNT(DISTINCT tbl_fp.customer_id) AS cnt_both_purchased_user
+FROM (SELECT customer_id,
+			category,
+			COUNT(*) AS cnt_purchase
+		FROM tbl_purchase
+		WHERE purchased_date BETWEEN '2020-07-01' AND '2020-07-31'
+			AND category = 'Furniture'
+		GROUP BY customer_id, category) AS tbl_fp -- furniture_purchase
+JOIN (SELECT customer_id,
+			category,
+			COUNT(*) AS cnt_purchase
+		FROM tbl_purchase
+		WHERE purchased_date BETWEEN '2020-07-01' AND '2020-07-31'
+			AND category = 'Education'
+		GROUP BY customer_id, category) AS tbl_ep -- education_purchase
+ON tbl_fp.customer_id = tbl_ep.customer_id ;
+
 
 
 -- 20. 2020년 7월 기준 day1 리텐션이 어떤가? 추세를 보기 위해 daily 추출
@@ -416,17 +479,8 @@ FROM tbl_new_purchased ;-- conversion rate
 
 -- 21. 가입 기간별 고객 분포(기존/신규) dau 기준
 
--- 22. 2020년 7월 기준, 누적 구매 횟수 3번 이상인 고객 리스트 추출
 
--- 23. 2020년 7월 각 카테고리별 판매 금액과 비율 (%)
-SELECT category,
-	SUM(price) AS revenue
-FROM tbl_purchase
-WHERE purchased_date BETWEEN '2020-07-01' AND '2020-07-31'
-GROUP BY category ;
--- 비율은 내일,,
 
--- 24. 2020년 7월 Furniture와 Education을 각 1회 이상씩 구매한 고객 수 
 
 -- 25. 전체 기간 동안 첫 구매는 Furniture, 마지막 구매는 다른 카테고리인 고객 수
 
