@@ -483,5 +483,48 @@ ON tbl_fp.customer_id = tbl_ep.customer_id ;
 
 
 -- 25. 전체 기간 동안 첫 구매는 Furniture, 마지막 구매는 다른 카테고리인 고객 수
+-- 첫 구매 Furniture
+SELECT customer_id,
+	category,
+    MIN(purchased_date)
+FROM tbl_purchase
+WHERE category = 'Furniture' 
+GROUP BY customer_id, category ;
+
+-- 마지막 구매 Education, Electronic
+SELECT customer_id,
+	category,
+    MAX(purchased_date)
+FROM tbl_purchase
+WHERE category != 'Furniture'
+GROUP BY customer_id, category ;
+
+-- 두가지 합치기
+
+WITH tbl_min_date AS (SELECT customer_id,
+						category,
+						MIN(purchased_date)
+					FROM tbl_purchase
+					WHERE category = 'Furniture' 
+					GROUP BY customer_id, category),
+	tbl_total AS (SELECT tbl_purchase.customer_id,
+						tbl_min_date.category AS first_buy,
+						tbl_purchase.category AS last_buy,
+						MAX(purchased_date)
+					FROM tbl_purchase
+					INNER JOIN tbl_min_date
+						ON tbl_purchase.customer_id = tbl_min_date.customer_id
+					WHERE tbl_purchase.category != 'Furniture'
+					GROUP BY customer_id, first_buy, last_buy)
+
+SELECT COUNT(*) AS cnt_customer
+-- 잘 나오는거 확인해서 주석처리
+-- tbl_total.customer_id AS user_id,
+-- 	first_buy,
+--     last_buy
+FROM tbl_total
+-- ORDER BY user_id ;
+
+
 
 -- 26. 첫 구매 카테고리별로 1달 리텐션
