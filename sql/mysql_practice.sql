@@ -474,15 +474,8 @@ ON tbl_fp.customer_id = tbl_ep.customer_id ;
 
 
 
--- 20. 2020년 7월 기준 day1 리텐션이 어떤가? 추세를 보기 위해 daily 추출
--- N-day Retention: N = 1,2,3,... 등
 
--- 21. 가입 기간별 고객 분포(기존/신규) dau 기준
-
-
-
-
--- 25. 전체 기간 동안 첫 구매는 Furniture, 마지막 구매는 다른 카테고리인 고객 수
+-- 23. 전체 기간 동안 첫 구매는 Furniture, 마지막 구매는 다른 카테고리인 고객 수
 -- 첫 구매 Furniture
 SELECT customer_id,
 	category,
@@ -522,8 +515,42 @@ SELECT COUNT(*) AS cnt_customer
 -- tbl_total.customer_id AS user_id,
 -- 	first_buy,
 --     last_buy
-FROM tbl_total
+FROM tbl_total ;
 -- ORDER BY user_id ;
+
+
+-- 24. 가장 많이 팔린 상품은?
+SELECT product_id,
+	COUNT(*) cnt_product
+FROM tbl_purchase
+GROUP BY product_id
+ORDER BY cnt_product DESC ;
+
+-- 25. 가장 많이 팔린 상품을 가장 많이 구매한 고객?
+-- 가장 많이 팔린 상품
+WITH tbl_most_sold AS(
+	SELECT product_id,
+		MAX(customer_id),
+		COUNT(*) cnt_product
+	FROM tbl_purchase
+	GROUP BY product_id
+	ORDER BY cnt_product DESC 
+	LIMIT 1)
+-- 가장 많이 팔린 상품을 많이 구매한 고객 순서대로 
+SELECT tbl_purchase.customer_id,
+	COUNT(*) cnt_per_customer
+FROM tbl_purchase
+RIGHT JOIN tbl_most_sold
+	ON tbl_purchase.product_id = tbl_most_sold.product_id
+GROUP BY tbl_purchase.customer_id
+ORDER BY cnt_per_customer DESC ;
+
+
+
+-- 20. 2020년 7월 기준 day1 리텐션이 어떤가? 추세를 보기 위해 daily 추출
+-- N-day Retention: N = 1,2,3,... 등
+
+-- 21. 가입 기간별 고객 분포(기존/신규) dau 기준
 
 
 
