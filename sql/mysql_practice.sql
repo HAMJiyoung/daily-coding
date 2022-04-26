@@ -550,6 +550,14 @@ ORDER BY cnt_per_customer DESC ;
 -- 20. 2020년 7월 기준 day1 리텐션이 어떤가? 추세를 보기 위해 daily 추출
 -- N-day Retention: N = 1,2,3,... 등
 
+-- 일자별 접속 유저
+SELECT DATE(visited_at - INTERVAL 9 HOUR) AS visit_date, -- 8월 1일까지 잡혀서 답안지 보니 -9시간 해야된다고 함
+	COUNT(DISTINCT customer_id) AS cnt_visited_user
+FROM tbl_visit 
+WHERE visited_at >= '2020-07-01 00:00:00' AND visited_at < '2020-08-01 00:00:00'
+GROUP BY visit_date ;
+
+
 -- 21. 가입 기간별 고객 분포(기존/신규) dau 기준
 
 
